@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Infoproduct Market — Parcial #1 UX/UI · Ramiro Della Torre</title>
+<meta name="description" content="Parcial #1 de Diseño UX/UI — Marketplace de infoproductos. Ramiro Della Torre, Comisión A, ISEC 2026." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<!-- Spline viewer (web component oficial) -->
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.48/build/spline-viewer.js"></script>
+<style>
+  /* =========================
+     RESET & BASE
+     ========================= */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0F0F0F;
+    --bg-2: #161616;
+    --bg-3: #1C1C1C;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --text: #F5F5F5;
+    --text-muted: #A8A8A8;
+    --text-dim: #6E6E6E;
+    --accent: #7C3AED;
+    --accent-2: #A78BFA;
+    --accent-soft: rgba(124, 58, 237, 0.14);
+    --accent-glow: rgba(124, 58, 237, 0.40);
+    --success: #34D399;
+    --danger: #F87171;
+    --radius: 14px;
+    --radius-lg: 22px;
+    --maxw: 1240px;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,0.20), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(124,58,237,0.10), transparent 60%);
+  }
+  a { color: var(--accent-2); text-decoration: none; transition: color .2s ease; }
+  a:hover { color: var(--text); }
+  img { max-width: 100%; display: block; }
+  h1, h2, h3, h4 { font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; }
+  h1 { font-size: clamp(2.6rem, 6.2vw, 4.6rem); font-weight: 800; }
+  h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); font-weight: 700; }
+  h3 { font-size: clamp(1.1rem, 1.6vw, 1.3rem); font-weight: 700; }
+  p { color: var(--text-muted); }
+
+  /* =========================
+     LAYOUT
+     ========================= */
+  .container {
+    width: 100%;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+  section {
+    position: relative;
+    padding: 130px 0;
+    overflow: hidden;
+  }
+  section + section { border-top: 1px solid var(--line); }
+
+  /* Background number decoration */
+  .bg-num {
+    position: absolute;
+    top: 50%;
+    right: -2vw;
+    transform: translateY(-50%);
+    font-family: 'Sora', sans-serif;
+    font-weight: 900;
+    font-size: clamp(14rem, 30vw, 28rem);
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.025);
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.05em;
+    z-index: 0;
+  }
+  .section-content { position: relative; z-index: 1; }
+
+  /* Section header */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 18px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .section-title { margin-bottom: 18px; }
+  .section-lead {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 720px;
+    margin-bottom: 48px;
+  }
+
+  /* =========================
+     NAVBAR
+     ========================= */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 0;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(15, 15, 15, 0.65);
+    border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, background .25s ease;
+  }
+  .navbar.scrolled { border-bottom-color: var(--line); }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .nav-logo:hover { color: var(--text); }
+  .nav-logo .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 14px var(--accent-glow); }
+    50% { box-shadow: 0 0 24px var(--accent); }
+  }
+  .nav-meta {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  /* =========================
+     BRAND LOGO (Shield mark)
+     ========================= */
+  .brand-mark {
+    display: inline-block;
+    overflow: visible;
+    flex-shrink: 0;
+  }
+  .brand-mark--sm {
+    width: 38px;
+    height: 38px;
+    filter: drop-shadow(0 6px 12px rgba(124, 58, 237, 0.45));
+    transition: transform .35s cubic-bezier(.2,.9,.2,1);
+  }
+  .nav-logo:hover .brand-mark--sm { transform: rotate(-6deg) scale(1.05); }
+  .brand-mark--lg {
+    width: clamp(110px, 14vw, 170px);
+    height: clamp(110px, 14vw, 170px);
+    filter: drop-shadow(0 28px 40px rgba(74, 0, 128, 0.55));
+    animation: shieldFloaty 5.5s ease-in-out infinite;
+    perspective: 900px;
+  }
+  .brand-mark .shield-shine {
+    animation: shieldShimmer 3.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .brand-mark .arrow-left  { animation: arrowRise 2.9s ease-in-out infinite;       transform-origin: center; }
+  .brand-mark .arrow-right { animation: arrowRise 2.9s ease-in-out  .28s infinite; transform-origin: center; }
+  .brand-mark .arrow-top   { animation: arrowRise 2.9s ease-in-out  .52s infinite; transform-origin: center; }
+
+  @keyframes shieldFloaty {
+    0%, 100% { transform: translateY(0)   rotateX(8deg)  rotateY(-8deg); }
+    50%      { transform: translateY(-6px) rotateX(10deg) rotateY(-5deg); }
+  }
+  @keyframes shieldShimmer {
+    0%, 100% { opacity: .42; transform: translateX(-2%) rotate(-8deg); }
+    50%      { opacity: .9;  transform: translateX(3%)  rotate(-8deg); }
+  }
+  @keyframes arrowRise {
+    0%, 100% { transform: translateY(0);    opacity: .9; }
+    50%      { transform: translateY(-5%);  opacity: 1;  }
+  }
+
+  .brand-stack {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .brand-stack .brand-name {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: var(--text);
+    font-size: 0.98rem;
+    letter-spacing: -0.01em;
+  }
+  .brand-stack .brand-tag {
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .brand-hero {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .brand-hero::before {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    background: radial-gradient(circle at center, rgba(124,58,237,0.30), transparent 65%);
+    filter: blur(20px);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* =========================
+     HERO with 3D scene
+     ========================= */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 0 80px;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(800px 600px at 20% 30%, rgba(124,58,237,0.22), transparent 60%),
+      radial-gradient(700px 500px at 80% 70%, rgba(74,0,128,0.18), transparent 60%);
+    animation: auroraShift 14s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes auroraShift {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0.85; }
+    100% { transform: translate(4%, -3%) scale(1.08); opacity: 1; }
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 32px;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-content { max-width: 640px; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(124, 58, 237, 0.32);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--accent-2);
+    margin-bottom: 28px;
+    backdrop-filter: blur(8px);
+  }
+  .hero-badge .pulse {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent-2);
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(167, 139, 250, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 7.4vw, 5.6rem);
+    background: linear-gradient(135deg, #FFFFFF 0%, #E9D5FF 45%, #A270FF 75%, #6817BE 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 24px;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+    text-shadow: 0 0 80px rgba(124, 58, 237, 0.18);
+  }
+  .hero h1 .light { font-weight: 300; opacity: 0.9; font-style: italic; }
+  .hero-sub {
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    color: var(--text-muted);
+    max-width: 540px;
+    margin-bottom: 14px;
+    line-height: 1.65;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+  .hero-author {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    margin-bottom: 44px;
+    letter-spacing: 0.02em;
+  }
+  .hero-author strong { color: var(--text); font-weight: 600; }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    box-shadow: 0 10px 40px -10px var(--accent-glow);
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn:hover {
+    background: #6D28D9;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 48px -10px var(--accent-glow);
+    color: white;
+  }
+  .btn .arrow { width: 18px; height: 18px; transition: transform .2s ease; }
+  .btn:hover .arrow { transform: translateY(3px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--line-strong);
+    box-shadow: none;
+  }
+  .btn-secondary:hover {
+    background: var(--bg-2);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* Spline 3D scene wrapper */
+  .spline-wrap {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, rgba(124,58,237,0.18) 0%, transparent 70%);
+  }
+  spline-viewer {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .spline-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: var(--bg);
+    z-index: 2;
+    transition: opacity .6s ease;
+  }
+  .spline-loader.hidden { opacity: 0; pointer-events: none; }
+  .loader-ring {
+    width: 56px; height: 56px;
+    border: 3px solid rgba(124,58,237,0.18);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  /* Hide Spline watermark badge (visible only in free plan) */
+  spline-viewer::part(logo) { display: none !important; }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.6;
+    z-index: 2;
+  }
+  .scroll-hint .line {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollLine 2.2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%, 100% { transform: scaleY(0.4); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+  }
+
+  /* =========================
+     3D CSS DECORATIONS
+     ========================= */
+  .orb-3d {
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 30%, #A78BFA 0%, #7C3AED 35%, #1C1C1C 75%);
+    filter: blur(2px);
+    box-shadow:
+      inset 30px -40px 60px rgba(0,0,0,0.6),
+      inset -20px 20px 80px rgba(167,139,250,0.5),
+      0 30px 100px -20px rgba(124,58,237,0.35);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+    animation: floatOrb 14s ease-in-out infinite;
+  }
+  @keyframes floatOrb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.05); }
+    66% { transform: translate(-30px, 20px) scale(0.95); }
+  }
+  .orb-right { right: -120px; top: 30%; }
+  .orb-left { left: -140px; bottom: 10%; animation-delay: -4s; }
+  .orb-small { width: 220px; height: 220px; opacity: 0.4; }
+
+  /* Rotating wireframe cube */
+  .cube-stage {
+    position: absolute;
+    width: 220px; height: 220px;
+    perspective: 900px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+  .cube {
+    position: relative;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    animation: rotateCube 22s linear infinite;
+  }
+  .cube .face {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(167, 139, 250, 0.45);
+    background: linear-gradient(135deg, rgba(124,58,237,0.06), transparent);
+    box-shadow: inset 0 0 30px rgba(124,58,237,0.15);
+  }
+  .cube .face.f1 { transform: translateZ(110px); }
+  .cube .face.f2 { transform: rotateY(180deg) translateZ(110px); }
+  .cube .face.f3 { transform: rotateY(90deg) translateZ(110px); }
+  .cube .face.f4 { transform: rotateY(-90deg) translateZ(110px); }
+  .cube .face.f5 { transform: rotateX(90deg) translateZ(110px); }
+  .cube .face.f6 { transform: rotateX(-90deg) translateZ(110px); }
+  @keyframes rotateCube {
+    0%   { transform: rotateX(0)    rotateY(0); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }
+
+  /* Orbiting ring */
+  .ring-3d {
+    position: absolute;
+    width: 480px;
+    height: 480px;
+    border-radius: 50%;
+    border: 1px solid rgba(167, 139, 250, 0.18);
+    pointer-events: none;
+    z-index: 0;
+    animation: spinSlow 30s linear infinite;
+  }
+  .ring-3d::after {
+    content: '';
+    position: absolute;
+    inset: 30px;
+    border-radius: 50%;
+    border: 1px dashed rgba(124, 58, 237, 0.20);
+  }
+  @keyframes spinSlow { to { transform: rotate(360deg); } }
+
+  /* =========================
+     CARDS (with tilt option)
+     ========================= */
+  .card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-3));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    transition: border-color .25s ease, box-shadow .25s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+    position: relative;
+  }
+  .tilt {
+    transform: perspective(1100px) rotateX(0) rotateY(0);
+    transition: transform .25s cubic-bezier(.2,.65,.2,1), border-color .25s ease, box-shadow .25s ease;
+  }
+  .tilt:hover { border-color: var(--line-strong); }
+  .tilt::after {
+    /* Glare effect */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(167, 139, 250, 0.18), transparent 40%);
+    opacity: 0;
+    transition: opacity .25s ease;
+    pointer-events: none;
+  }
+  .tilt:hover::after { opacity: 1; }
+  .tilt > * { transform: translateZ(20px); }
+
+  /* =========================
+     SECTION 01 — PROJECT
+     ========================= */
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .project-text p { font-size: 1.05rem; line-height: 1.75; }
+  .project-text p + p { margin-top: 20px; }
+  .project-text strong { color: var(--text); font-weight: 600; }
+  .product-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .product-card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all .25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .product-card:hover {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, var(--bg-2), rgba(124,58,237,0.08));
+  }
+  .product-icon {
+    position: relative;
+    width: 96px; height: 96px;
+    border-radius: 18px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, #2a2a4e 0%, #1f1f35 100%);
+    box-shadow:
+      0 20px 36px rgba(0, 0, 0, .55),
+      inset -2px -2px 10px rgba(255, 255, 255, .05),
+      inset 2px 2px 10px rgba(0, 0, 0, .35);
+    overflow: hidden;
+    perspective: 900px;
+    transition: transform .3s cubic-bezier(.2,.65,.2,1);
+    animation: iconCardFloat 4.4s ease-in-out infinite;
+  }
+  .product-icon::before {
+    content: '';
+    position: absolute;
+    width: 240%; height: 240%;
+    top: -70%; left: -70%;
+    background: radial-gradient(circle at 30% 30%, rgba(200, 120, 255, .22), transparent 38%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(28px);
+    z-index: 0;
+  }
+  .product-icon .icon-3d {
+    position: relative;
+    width: 78%; height: 78%;
+    transform-style: preserve-3d;
+    animation: iconRotate 7.5s ease-in-out infinite;
+    z-index: 1;
+    filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .55)) drop-shadow(0 -4px 12px rgba(200, 120, 255, .18));
+  }
+  .product-card:nth-child(2) .product-icon { animation-delay: .6s; }
+  .product-card:nth-child(2) .icon-3d     { animation-delay: .9s; }
+  .product-card:nth-child(3) .product-icon { animation-delay: 1.1s; }
+  .product-card:nth-child(3) .icon-3d     { animation-delay: 1.6s; }
+  .product-card:nth-child(4) .product-icon { animation-delay: 1.7s; }
+  .product-card:nth-child(4) .icon-3d     { animation-delay: 2.2s; }
+  .product-card:hover .product-icon { transform: scale(1.05); }
+
+  @keyframes iconCardFloat {
+    0%, 100% { transform: translateZ(20px) translateY(0); }
+    50%      { transform: translateZ(20px) translateY(-5px); }
+  }
+  @keyframes iconRotate {
+    0%, 100% { transform: rotateX(15deg) rotateY(-12deg) rotateZ(0); }
+    50%      { transform: rotateX(12deg) rotateY(8deg)   rotateZ(3deg); }
+  }
+  .product-name { font-weight: 700; color: var(--text); font-size: 1rem; }
+  .product-desc { font-size: 0.85rem; color: var(--text-dim); }
+
+  /* =========================
+     SECTION 02 — QUOTE
+     ========================= */
+  .quote-block {
+    position: relative;
+    padding: 12px 0 12px 40px;
+    border-left: 3px solid var(--accent);
+    max-width: 980px;
+  }
+  .quote-block::before {
+    content: '"';
+    position: absolute;
+    top: -40px;
+    left: 30px;
+    font-family: 'Sora', sans-serif;
+    font-size: 8rem;
+    color: var(--accent);
+    opacity: 0.15;
+    line-height: 1;
+  }
+  .quote-text {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .quote-text em {
+    font-style: normal;
+    color: var(--accent-2);
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* =========================
+     SECTION 03 — RESEARCH
+     ========================= */
+  .research-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .stat-card .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 18px;
+  }
+  .stat-card h3 { color: var(--text); margin-bottom: 14px; }
+  .stat-card p { font-size: 0.95rem; line-height: 1.7; }
+  .insight-line {
+    background: linear-gradient(90deg, rgba(124,58,237,0.12), transparent);
+    border-left: 2px solid var(--accent);
+    padding: 22px 26px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 500;
+    max-width: 880px;
+  }
+  .insight-line strong { color: var(--accent-2); }
+
+  /* =========================
+     SECTION 04 — BENCHMARKING
+     ========================= */
+  .benchmark-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 56px;
+  }
+  .benchmark-card .bench-name {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+    letter-spacing: 0.02em;
+  }
+  .bench-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .bench-list li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+  .bench-list li .ic {
+    flex-shrink: 0;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .bench-list li.pro .ic { background: rgba(52, 211, 153, 0.18); color: var(--success); }
+  .bench-list li.con .ic { background: rgba(248, 113, 113, 0.18); color: var(--danger); }
+  .bench-list .divider {
+    height: 1px;
+    background: var(--line);
+    margin: 6px 0;
+    list-style: none;
+  }
+
+  /* Comparison table */
+  .table-wrapper {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 8px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    min-width: 600px;
+  }
+  th, td {
+    padding: 18px 22px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  tr:last-child td { border-bottom: none; }
+  th {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: var(--text);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  td { color: var(--text-muted); }
+  td:first-child { color: var(--text); font-weight: 600; }
+
+  /* =========================
+     SECTION 05 — RESEARCH USUARIOS
+     ========================= */
+  .subsection-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .subsection-label .num {
+    width: 36px; height: 36px;
+    background: var(--accent-soft);
+    color: var(--accent-2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .subsection-label h3 { font-size: 1.4rem; color: var(--text); }
+  .interview-card {
+    background: linear-gradient(135deg, var(--bg-2), var(--bg-3));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    margin-bottom: 28px;
+  }
+  .interview-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: white;
+    box-shadow: 0 8px 24px -6px var(--accent-glow);
+  }
+  .interview-meta .name { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+  .interview-meta .role { font-size: 0.9rem; color: var(--text-dim); }
+  .quotes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .quote-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    position: relative;
+    transition: all .25s ease;
+    overflow: hidden;
+  }
+  .quote-card .emoji { font-size: 1.3rem; margin-bottom: 12px; }
+  .quote-card p { color: var(--text); font-style: italic; font-size: 0.95rem; line-height: 1.55; }
+
+  /* Survey stats */
+  .survey-block { margin-top: 56px; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .mini-stat {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    transition: all .25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .mini-stat .value {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--accent-2);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+  .mini-stat .label { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+
+  .distrust-card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--danger);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+  }
+  .distrust-card h4 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .distrust-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .distrust-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    color: var(--text-muted); font-size: 0.95rem;
+  }
+  .distrust-list li::before {
+    content: '—';
+    color: var(--danger);
+    flex-shrink: 0;
+  }
+
+  .external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 16px;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 0.88rem;
+    color: var(--accent-2);
+    transition: all .2s ease;
+  }
+  .external-link:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+  .external-link svg { width: 14px; height: 14px; }
+
+  /* =========================
+     SECTION 06 — PERSONA
+     ========================= */
+  .persona-card {
+    background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-3) 100%);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .persona-header {
+    padding: 36px 40px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(124,58,237,0.04));
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .persona-avatar {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 12px 36px -8px var(--accent-glow);
+    flex-shrink: 0;
+  }
+  .persona-info .name {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .persona-info .meta {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .persona-info .meta span + span::before {
+    content: '·';
+    margin: 0 10px;
+    color: var(--text-dim);
+  }
+  .persona-quote {
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.5;
+    position: relative;
+    padding-left: 70px;
+  }
+  .persona-quote::before {
+    content: '"';
+    position: absolute;
+    left: 32px;
+    top: 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 3.5rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .persona-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .persona-block {
+    padding: 32px 40px;
+    border-right: 1px solid var(--line);
+  }
+  .persona-block:last-child { border-right: none; }
+  .persona-block h4 {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent-2);
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .persona-block ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .persona-block li {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .persona-block li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 9px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* =========================
+     SECTION 07/08/09 — LINK SECTIONS
+     ========================= */
+  .link-section {
+    background: linear-gradient(135deg, var(--bg-2), var(--bg-3));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    text-align: left;
+    max-width: 920px;
+    position: relative;
+    overflow: hidden;
+  }
+  .link-section p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 720px;
+  }
+  .big-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 10px 40px -10px var(--accent-glow);
+    transition: all .2s ease;
+  }
+  .big-link:hover {
+    background: #6D28D9;
+    transform: translateY(-2px);
+    color: white;
+  }
+  .big-link.placeholder {
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1px dashed var(--line-strong);
+    box-shadow: none;
+  }
+  .big-link.placeholder:hover {
+    border-color: var(--accent);
+    color: var(--accent-2);
+    background: var(--bg);
+  }
+  .big-link .icon { font-size: 1.2rem; }
+
+  /* =========================
+     SECTION 10 — WIREFRAMES
+     ========================= */
+  .wireframe-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .wireframe-card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-3));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    transition: all .3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .wireframe-card .wf-icon {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    width: 64px; height: 64px;
+    background: var(--accent-soft);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wireframe-card h3 { color: var(--text); margin-bottom: 12px; }
+  .wireframe-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  /* =========================
+     FOOTER
+     ========================= */
+  footer {
+    padding: 80px 0 60px;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+    text-align: center;
+    position: relative;
+  }
+  footer::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .footer-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .footer-meta {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+  .footer-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--accent);
+    margin: 24px auto;
+    border-radius: 999px;
+  }
+
+  /* =========================
+     SCROLL ANIMATIONS
+     ========================= */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .8s cubic-bezier(.2,.65,.2,1), transform .8s cubic-bezier(.2,.65,.2,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal[data-delay="1"] { transition-delay: .1s; }
+  .reveal[data-delay="2"] { transition-delay: .2s; }
+  .reveal[data-delay="3"] { transition-delay: .3s; }
+  .reveal[data-delay="4"] { transition-delay: .4s; }
+
+  /* =========================
+     RESPONSIVE
+     ========================= */
+  @media (max-width: 1080px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .spline-wrap { height: 460px; }
+  }
+  @media (max-width: 980px) {
+    section { padding: 90px 0; }
+    .project-grid { grid-template-columns: 1fr; gap: 40px; }
+    .research-grid { grid-template-columns: 1fr; }
+    .benchmark-grid { grid-template-columns: 1fr; }
+    .quotes-grid { grid-template-columns: 1fr; }
+    .persona-grid { grid-template-columns: 1fr; }
+    .persona-block { border-right: none; border-bottom: 1px solid var(--line); }
+    .persona-block:last-child { border-bottom: none; }
+    .wireframe-grid { grid-template-columns: 1fr; }
+    .link-section { padding: 32px; }
+    .bg-num { font-size: clamp(10rem, 36vw, 18rem); right: -5vw; }
+    .orb-3d { width: 260px; height: 260px; }
+  }
+  @media (max-width: 640px) {
+    .container { padding: 0 20px; }
+    section { padding: 70px 0; }
+    .hero { padding: 110px 0 60px; }
+    .spline-wrap { height: 360px; }
+    .nav-meta { display: none; }
+    .product-types { grid-template-columns: 1fr; }
+    .quote-block { padding-left: 22px; }
+    .quote-block::before { left: 14px; font-size: 5rem; top: -20px; }
+    .interview-card { padding: 24px; }
+    .interview-meta .role { font-size: 0.82rem; }
+    .persona-header, .persona-quote, .persona-block { padding: 24px; }
+    .persona-quote { padding-left: 56px; }
+    th, td { padding: 14px; font-size: 0.85rem; }
+    .cube-stage { display: none; }
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="container nav-inner">
+    <a href="#hero" class="nav-logo">
+      <svg class="brand-mark brand-mark--sm" viewBox="0 0 520 520" aria-label="Infoproduct Market">
+        <defs>
+          <linearGradient id="navEdge" x1="115" y1="82" x2="405" y2="440" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#B790FF"/>
+            <stop offset=".38" stop-color="#4A0080"/>
+            <stop offset=".72" stop-color="#210037"/>
+            <stop offset="1" stop-color="#A879FF"/>
+          </linearGradient>
+          <linearGradient id="navFill" x1="120" y1="60" x2="420" y2="450" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#4A0080"/>
+            <stop offset=".48" stop-color="#6817BE"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+          </linearGradient>
+        </defs>
+        <path d="M260 76 C316 111 368 114 414 117 C411 250 372 360 260 438 C148 360 109 250 106 117 C152 114 204 111 260 76 Z" fill="url(#navEdge)"/>
+        <path d="M260 103 C306 130 349 134 388 137 C382 247 349 337 260 401 C171 337 138 247 132 137 C171 134 214 130 260 103 Z" fill="url(#navFill)"/>
+        <path d="M181 122 C226 134 314 154 363 194 C344 177 314 157 279 139 C242 120 207 112 181 122 Z" fill="#FFFFFF" opacity=".35"/>
+        <text x="260" y="290" text-anchor="middle" font-family="Sora, 'Arial Black', sans-serif" font-size="170" font-weight="900" letter-spacing="-10" fill="#FFFFFF">IM</text>
+      </svg>
+      <div class="brand-stack">
+        <span class="brand-name">Infoproduct Market</span>
+        <span class="brand-tag">Parcial · UX/UI · ISEC</span>
+      </div>
+    </a>
+    <div class="nav-meta">Mayo 2026</div>
+  </div>
+</nav>
+
+<!-- ===== HERO con Spline 3D ===== -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content reveal">
+        <div class="brand-hero">
+          <svg class="brand-mark brand-mark--lg" viewBox="0 0 520 520" role="img" aria-label="Infoproduct Market logo">
+            <defs>
+              <linearGradient id="heroShield" x1="120" y1="60" x2="420" y2="450" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#4A0080"/>
+                <stop offset=".48" stop-color="#6817BE"/>
+                <stop offset="1" stop-color="#7C3AED"/>
+              </linearGradient>
+              <linearGradient id="heroEdge" x1="115" y1="82" x2="405" y2="440" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#B790FF"/>
+                <stop offset=".38" stop-color="#4A0080"/>
+                <stop offset=".72" stop-color="#210037"/>
+                <stop offset="1" stop-color="#A879FF"/>
+              </linearGradient>
+              <linearGradient id="heroMetal" x1="155" y1="105" x2="390" y2="400" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#FFFFFF" stop-opacity=".9"/>
+                <stop offset=".18" stop-color="#D8C2FF" stop-opacity=".55"/>
+                <stop offset=".42" stop-color="#7C3AED" stop-opacity=".08"/>
+                <stop offset=".72" stop-color="#1B0033" stop-opacity=".24"/>
+                <stop offset="1" stop-color="#FFFFFF" stop-opacity=".34"/>
+              </linearGradient>
+              <linearGradient id="heroArrow" x1="130" y1="88" x2="390" y2="360" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#E8D8FF"/>
+                <stop offset=".16" stop-color="#9F67FF"/>
+                <stop offset=".58" stop-color="#7C3AED"/>
+                <stop offset="1" stop-color="#4A0080"/>
+              </linearGradient>
+              <linearGradient id="heroCheck" x1="145" y1="310" x2="404" y2="205" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#FFFFFF"/>
+                <stop offset=".18" stop-color="#DCCBFF"/>
+                <stop offset=".58" stop-color="#A270FF"/>
+                <stop offset="1" stop-color="#FFFFFF"/>
+              </linearGradient>
+              <radialGradient id="heroTopLight" cx="44%" cy="13%" r="62%">
+                <stop offset="0" stop-color="#FFFFFF" stop-opacity=".9"/>
+                <stop offset=".18" stop-color="#FFFFFF" stop-opacity=".45"/>
+                <stop offset=".5" stop-color="#FFFFFF" stop-opacity=".06"/>
+                <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="heroSoftShadow" x="-30%" y="-25%" width="160%" height="170%">
+                <feDropShadow dx="0" dy="18" stdDeviation="17" flood-color="#19002D" flood-opacity=".45"/>
+                <feDropShadow dx="-10" dy="7" stdDeviation="8" flood-color="#7C3AED" flood-opacity=".35"/>
+              </filter>
+              <filter id="heroTextDepth" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="2.2" flood-color="#170026" flood-opacity=".62"/>
+                <feDropShadow dx="0" dy="-1" stdDeviation=".8" flood-color="#FFFFFF" flood-opacity=".34"/>
+              </filter>
+            </defs>
+            <ellipse cx="260" cy="468" rx="138" ry="30" fill="#210037" opacity=".18"/>
+            <g class="arrow-left" filter="url(#heroSoftShadow)">
+              <path d="M105 298 C72 240 82 168 138 116" fill="none" stroke="url(#heroArrow)" stroke-width="24" stroke-linecap="round"/>
+              <path d="M139 82 L190 132 L119 148 Z" fill="url(#heroArrow)"/>
+              <path d="M92 217 C89 178 104 142 137 114" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+            </g>
+            <g class="arrow-right" filter="url(#heroSoftShadow)">
+              <path d="M415 298 C448 240 438 168 382 116" fill="none" stroke="url(#heroArrow)" stroke-width="24" stroke-linecap="round"/>
+              <path d="M381 82 L330 132 L401 148 Z" fill="url(#heroArrow)"/>
+              <path d="M428 218 C431 178 416 142 383 114" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+            </g>
+            <g class="arrow-top" filter="url(#heroSoftShadow)">
+              <path d="M260 72 L260 143" fill="none" stroke="url(#heroArrow)" stroke-width="24" stroke-linecap="round"/>
+              <path d="M260 35 L209 102 L311 102 Z" fill="url(#heroArrow)"/>
+              <path d="M249 75 L249 128" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+            </g>
+            <g filter="url(#heroSoftShadow)">
+              <path d="M260 76 C316 111 368 114 414 117 C411 250 372 360 260 438 C148 360 109 250 106 117 C152 114 204 111 260 76 Z" fill="url(#heroEdge)"/>
+              <path d="M260 103 C306 130 349 134 388 137 C382 247 349 337 260 401 C171 337 138 247 132 137 C171 134 214 130 260 103 Z" fill="url(#heroShield)"/>
+              <path d="M260 103 C306 130 349 134 388 137 C382 247 349 337 260 401 C171 337 138 247 132 137 C171 134 214 130 260 103 Z" fill="url(#heroMetal)" opacity=".72"/>
+              <path d="M151 150 C188 146 224 136 260 116 C296 136 332 146 369 150 C366 188 359 222 348 253 C286 223 213 196 151 150 Z" fill="url(#heroTopLight)" opacity=".82"/>
+              <path class="shield-shine" d="M181 122 C226 134 314 154 363 194 C344 177 314 157 279 139 C242 120 207 112 181 122 Z" fill="#FFFFFF" opacity=".46"/>
+              <path d="M260 76 C316 111 368 114 414 117 C411 250 372 360 260 438 C148 360 109 250 106 117 C152 114 204 111 260 76 Z" fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".3"/>
+            </g>
+            <g filter="url(#heroTextDepth)">
+              <text x="260" y="288" text-anchor="middle" font-family="Sora, 'Arial Black', sans-serif" font-size="150" font-weight="900" letter-spacing="-10" fill="#FFFFFF">IM</text>
+              <text x="260" y="288" text-anchor="middle" font-family="Sora, 'Arial Black', sans-serif" font-size="150" font-weight="900" letter-spacing="-10" fill="none" stroke="#E9D9FF" stroke-width="2" opacity=".55">IM</text>
+            </g>
+            <path d="M143 302 C183 343 218 359 249 361 C294 364 335 326 396 249" fill="none" stroke="#230039" stroke-width="31" stroke-linecap="round" stroke-linejoin="round" opacity=".28"/>
+            <path d="M143 292 C183 333 218 349 249 351 C294 354 335 316 396 239" fill="none" stroke="url(#heroCheck)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M157 288 C190 318 220 333 249 333 C284 333 320 304 371 244" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".72"/>
+          </svg>
+        </div>
+        <div class="hero-badge">
+          <span class="pulse"></span>
+          Diseño UX/UI · Parcial #1 · ISEC
+        </div>
+        <h1>Infoproduct<br/><span class="light">Market.</span></h1>
+        <p class="hero-sub">Un marketplace de infoproductos pensado para Argentina — donde las <strong>reseñas verificadas</strong> y la <strong>previsualización honesta</strong> son el verdadero motor de decisión de compra.</p>
+        <p class="hero-author">Por <strong>Ramiro Della Torre</strong> · Comisión A · Mayo 2026</p>
+        <div class="hero-actions">
+          <a href="#proyecto" class="btn">
+            Ver presentación
+            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          </a>
+          <a href="#wireframes" class="btn btn-secondary">
+            Saltar a wireframes
+          </a>
+        </div>
+      </div>
+
+      <div class="reveal" data-delay="1">
+        <div class="spline-wrap" id="splineWrap">
+          <div class="spline-loader" id="splineLoader">
+            <div class="loader-ring"></div>
+            <div class="loader-text">Cargando escena 3D</div>
+          </div>
+          <spline-viewer
+            id="splineHero"
+            url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+            loading-anim
+            events-target="global">
+          </spline-viewer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <span class="line"></span>
+  </div>
+</section>
+
+<!-- ===== 01 — EL PROYECTO ===== -->
+<section id="proyecto">
+  <div class="bg-num" aria-hidden="true">01</div>
+  <div class="orb-3d orb-right orb-small" aria-hidden="true"></div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">01 · El proyecto</div>
+      <h2 class="section-title">¿Qué estamos diseñando?</h2>
+    </div>
+    <div class="project-grid">
+      <div class="project-text reveal" data-delay="1">
+        <p>Un <strong>marketplace de infoproductos</strong> donde creadores publican y venden contenido digital — cursos, mentorías, ebooks y plantillas — y los compradores exploran el catálogo, comparan reseñas y adquieren con métodos de pago locales.</p>
+        <p>Combina el modelo de <strong>Hotmart</strong> (cualquier creador puede vender) con el de <strong>Amazon</strong> (catálogo amplio, reseñas como driver de decisión). Una plataforma que une descubrimiento, confianza y conversión en un solo lugar.</p>
+      </div>
+      <div class="product-types reveal" data-delay="2">
+        <!-- Cursos · 3D Graduation Cap -->
+        <div class="product-card tilt">
+          <div class="product-icon">
+            <svg class="icon-3d" viewBox="0 0 240 240" role="img" aria-label="Birrete de graduación 3D">
+              <defs>
+                <linearGradient id="capMainGrad-c" x1="30%" y1="20%" x2="70%" y2="80%">
+                  <stop offset="0%" stop-color="#9f5bff"/>
+                  <stop offset="45%" stop-color="#7c3aed"/>
+                  <stop offset="100%" stop-color="#5a1fa0"/>
+                </linearGradient>
+                <linearGradient id="boardGrad-c" x1="20%" y1="10%" x2="80%" y2="90%">
+                  <stop offset="0%" stop-color="#d4af37"/>
+                  <stop offset="40%" stop-color="#c9a027"/>
+                  <stop offset="100%" stop-color="#8b6f47"/>
+                </linearGradient>
+                <linearGradient id="shimmerGrad-c" x1="10%" y1="10%" x2="90%" y2="50%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity=".8"/>
+                  <stop offset="50%" stop-color="#ffffff" stop-opacity=".2"/>
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="tassel-c" x1="50%" y1="0%" x2="50%" y2="100%">
+                  <stop offset="0%" stop-color="#d4af37"/>
+                  <stop offset="100%" stop-color="#a88a2e"/>
+                </linearGradient>
+                <filter id="softGlow-c"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <ellipse cx="120" cy="165" rx="65" ry="16" fill="#000" opacity=".15" filter="url(#softGlow-c)"/>
+              <path d="M 65 90 Q 65 75 85 65 L 155 65 Q 175 75 175 90 L 145 120 L 95 120 Z" fill="url(#capMainGrad-c)" stroke="#4a1a8a" stroke-width="1.2" opacity=".95" filter="url(#softGlow-c)"/>
+              <ellipse cx="120" cy="78" rx="45" ry="12" fill="url(#shimmerGrad-c)" opacity=".6"/>
+              <path d="M 85 80 Q 100 88 120 88 Q 140 88 155 80" fill="none" stroke="#1a0033" stroke-width="2.5" opacity=".5" stroke-linecap="round"/>
+              <rect x="85" y="108" width="70" height="70" rx="6" fill="url(#boardGrad-c)" stroke="#5a4220" stroke-width="1.4" opacity=".98" filter="url(#softGlow-c)"/>
+              <ellipse cx="110" cy="125" rx="24" ry="18" fill="url(#shimmerGrad-c)" opacity=".55"/>
+              <path d="M 155 108 L 165 98 L 165 168 L 155 178 Z" fill="#8b6f47" opacity=".7" stroke="#4a3920" stroke-width=".8"/>
+              <path d="M 85 178 L 95 188 L 165 188 L 155 178 Z" fill="#6b5537" opacity=".6" stroke="#3a2910" stroke-width=".8"/>
+              <line x1="120" y1="108" x2="120" y2="155" stroke="#d4af37" stroke-width="3.5" stroke-linecap="round" opacity=".9" filter="url(#softGlow-c)"/>
+              <circle cx="120" cy="165" r="14" fill="url(#tassel-c)" stroke="#8b6f47" stroke-width="1.2" opacity=".95" filter="url(#softGlow-c)"/>
+              <circle cx="115" cy="162" r="4" fill="#a88a2e" opacity=".8"/>
+              <circle cx="125" cy="162" r="4" fill="#a88a2e" opacity=".8"/>
+              <circle cx="120" cy="170" r="4" fill="#a88a2e" opacity=".8"/>
+              <circle cx="118" cy="161" r="3.5" fill="#fff" opacity=".4"/>
+            </svg>
+          </div>
+          <div class="product-name">Cursos</div>
+          <div class="product-desc">Formación online por especialistas</div>
+        </div>
+
+        <!-- Mentorías · 3D Handshake -->
+        <div class="product-card tilt">
+          <div class="product-icon">
+            <svg class="icon-3d" viewBox="0 0 240 240" role="img" aria-label="Manos estrechándose 3D">
+              <defs>
+                <linearGradient id="handGrad-m" x1="20%" y1="10%" x2="80%" y2="90%">
+                  <stop offset="0%" stop-color="#f4d89f"/>
+                  <stop offset="35%" stop-color="#d4af37"/>
+                  <stop offset="65%" stop-color="#c9a027"/>
+                  <stop offset="100%" stop-color="#8b6f47"/>
+                </linearGradient>
+                <linearGradient id="accentGrad-m" x1="30%" y1="20%" x2="70%" y2="80%">
+                  <stop offset="0%" stop-color="#e8c547"/>
+                  <stop offset="100%" stop-color="#b8941f"/>
+                </linearGradient>
+                <linearGradient id="shimmerGrad-m" x1="10%" y1="10%" x2="90%" y2="50%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity=".8"/>
+                  <stop offset="50%" stop-color="#fff" stop-opacity=".2"/>
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="softGlow-m"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <filter id="rimLight-m"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <ellipse cx="120" cy="175" rx="70" ry="18" fill="#000" opacity=".12" filter="url(#softGlow-m)"/>
+              <path d="M 55 95 Q 50 100 55 120 Q 60 135 80 140 L 125 130 Q 115 110 100 105 Q 80 100 55 95 Z" fill="url(#handGrad-m)" stroke="#6b5537" stroke-width="1.2" opacity=".95" filter="url(#softGlow-m)"/>
+              <path d="M 100 105 Q 85 100 70 105 L 75 125 Q 90 120 105 125 Z" fill="#8b6f47" opacity=".6" stroke="#5a4220" stroke-width=".8"/>
+              <ellipse cx="70" cy="95" rx="6" ry="10" fill="url(#accentGrad-m)" opacity=".9" filter="url(#softGlow-m)"/>
+              <ellipse cx="80" cy="90" rx="5.5" ry="12" fill="url(#accentGrad-m)" opacity=".88" filter="url(#softGlow-m)"/>
+              <ellipse cx="90" cy="88" rx="5" ry="11" fill="url(#accentGrad-m)" opacity=".87" filter="url(#softGlow-m)"/>
+              <ellipse cx="75" cy="105" rx="20" ry="12" fill="url(#shimmerGrad-m)" opacity=".5"/>
+              <g transform="scale(-1 1) translate(-240 0)">
+                <path d="M 55 95 Q 50 100 55 120 Q 60 135 80 140 L 125 130 Q 115 110 100 105 Q 80 100 55 95 Z" fill="url(#handGrad-m)" stroke="#6b5537" stroke-width="1.2" opacity=".95" filter="url(#softGlow-m)"/>
+                <path d="M 100 105 Q 85 100 70 105 L 75 125 Q 90 120 105 125 Z" fill="#8b6f47" opacity=".6" stroke="#5a4220" stroke-width=".8"/>
+                <ellipse cx="70" cy="95" rx="6" ry="10" fill="url(#accentGrad-m)" opacity=".9" filter="url(#softGlow-m)"/>
+                <ellipse cx="80" cy="90" rx="5.5" ry="12" fill="url(#accentGrad-m)" opacity=".88" filter="url(#softGlow-m)"/>
+                <ellipse cx="90" cy="88" rx="5" ry="11" fill="url(#accentGrad-m)" opacity=".87" filter="url(#softGlow-m)"/>
+                <ellipse cx="75" cy="105" rx="20" ry="12" fill="url(#shimmerGrad-m)" opacity=".5"/>
+              </g>
+              <ellipse cx="120" cy="125" rx="35" ry="18" fill="url(#shimmerGrad-m)" opacity=".7" filter="url(#rimLight-m)"/>
+              <ellipse cx="120" cy="100" rx="65" ry="50" fill="none" stroke="#f4d89f" stroke-width=".6" opacity=".15"/>
+            </svg>
+          </div>
+          <div class="product-name">Mentorías</div>
+          <div class="product-desc">Acompañamiento 1 a 1 personalizado</div>
+        </div>
+
+        <!-- Ebooks · 3D Open Book -->
+        <div class="product-card tilt">
+          <div class="product-icon">
+            <svg class="icon-3d" viewBox="0 0 240 240" role="img" aria-label="Libro abierto 3D">
+              <defs>
+                <linearGradient id="bookSpineGrad-e" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1e3a5f"/>
+                  <stop offset="50%" stop-color="#0f2438"/>
+                  <stop offset="100%" stop-color="#081829"/>
+                </linearGradient>
+                <linearGradient id="pageGrad-e" x1="10%" y1="10%" x2="90%" y2="90%">
+                  <stop offset="0%" stop-color="#fff"/>
+                  <stop offset="50%" stop-color="#f5f9ff"/>
+                  <stop offset="100%" stop-color="#e8f0ff"/>
+                </linearGradient>
+                <linearGradient id="leftPageGrad-e" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1a4d7a"/>
+                  <stop offset="30%" stop-color="#2563a8"/>
+                  <stop offset="70%" stop-color="#1e3a5f"/>
+                  <stop offset="100%" stop-color="#0f2438"/>
+                </linearGradient>
+                <linearGradient id="glowShine-e" x1="20%" y1="20%" x2="80%" y2="80%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity=".9"/>
+                  <stop offset="40%" stop-color="#fff" stop-opacity=".3"/>
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="pageGlow-e"><feGaussianBlur stdDeviation="2" result="b"/><feFlood flood-color="#5b9fd8" flood-opacity=".3" result="f"/><feComposite in="f" in2="b" operator="in" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <filter id="softShadow-e"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <ellipse cx="120" cy="170" rx="65" ry="16" fill="#000" opacity=".15" filter="url(#softShadow-e)"/>
+              <path d="M 120 70 L 120 145 L 118 148 L 118 72 Z" fill="url(#bookSpineGrad-e)" opacity=".9" filter="url(#softShadow-e)"/>
+              <path d="M 120 70 L 120 145 L 122 148 L 122 72 Z" fill="url(#bookSpineGrad-e)" opacity=".7"/>
+              <path d="M 118 75 Q 100 78 85 85 L 88 140 Q 105 135 118 138 Z" fill="#0d1f2d" opacity=".5"/>
+              <path d="M 120 72 Q 100 75 70 90 L 72 135 Q 98 128 120 132 Z" fill="url(#leftPageGrad-e)" stroke="#1a4d7a" stroke-width=".8" filter="url(#pageGlow-e)"/>
+              <ellipse cx="95" cy="100" rx="18" ry="28" fill="url(#glowShine-e)" opacity=".4"/>
+              <line x1="78" y1="88" x2="108" y2="88" stroke="#1a4d7a" stroke-width=".5" opacity=".3"/>
+              <line x1="75" y1="98" x2="115" y2="98" stroke="#1a4d7a" stroke-width=".5" opacity=".25"/>
+              <line x1="76" y1="108" x2="110" y2="108" stroke="#1a4d7a" stroke-width=".5" opacity=".25"/>
+              <line x1="79" y1="118" x2="112" y2="118" stroke="#1a4d7a" stroke-width=".5" opacity=".2"/>
+              <path d="M 122 75 Q 140 78 155 85 L 152 140 Q 135 135 122 138 Z" fill="#0d1f2d" opacity=".5"/>
+              <path d="M 120 72 Q 140 75 170 90 L 168 135 Q 142 128 120 132 Z" fill="url(#pageGrad-e)" stroke="#d4e3f7" stroke-width=".8" filter="url(#pageGlow-e)"/>
+              <ellipse cx="145" cy="100" rx="18" ry="28" fill="url(#glowShine-e)" opacity=".5"/>
+              <line x1="132" y1="88" x2="162" y2="88" stroke="#8ba8c8" stroke-width=".5" opacity=".4"/>
+              <line x1="125" y1="98" x2="165" y2="98" stroke="#8ba8c8" stroke-width=".5" opacity=".3"/>
+              <line x1="126" y1="108" x2="164" y2="108" stroke="#8ba8c8" stroke-width=".5" opacity=".3"/>
+              <line x1="129" y1="118" x2="161" y2="118" stroke="#8ba8c8" stroke-width=".5" opacity=".25"/>
+              <ellipse cx="120" cy="75" rx="55" ry="8" fill="none" stroke="#a8d3ff" stroke-width=".6" opacity=".25"/>
+            </svg>
+          </div>
+          <div class="product-name">Ebooks</div>
+          <div class="product-desc">Libros digitales descargables</div>
+        </div>
+
+        <!-- Plantillas · 3D Folder (matching style, generated to match) -->
+        <div class="product-card tilt">
+          <div class="product-icon">
+            <svg class="icon-3d" viewBox="0 0 240 240" role="img" aria-label="Carpeta de plantillas 3D">
+              <defs>
+                <linearGradient id="folderGrad-p" x1="20%" y1="10%" x2="80%" y2="90%">
+                  <stop offset="0%" stop-color="#9f5bff"/>
+                  <stop offset="45%" stop-color="#7c3aed"/>
+                  <stop offset="100%" stop-color="#4a1a8a"/>
+                </linearGradient>
+                <linearGradient id="folderBack-p" x1="20%" y1="10%" x2="80%" y2="90%">
+                  <stop offset="0%" stop-color="#5a1fa0"/>
+                  <stop offset="100%" stop-color="#2a0d4d"/>
+                </linearGradient>
+                <linearGradient id="paperGrad-p" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fff"/>
+                  <stop offset="100%" stop-color="#e8e0ff"/>
+                </linearGradient>
+                <linearGradient id="paperAccent-p" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#f4d89f"/>
+                  <stop offset="100%" stop-color="#d4af37"/>
+                </linearGradient>
+                <linearGradient id="shimmerGrad-p" x1="10%" y1="10%" x2="90%" y2="50%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity=".85"/>
+                  <stop offset="50%" stop-color="#fff" stop-opacity=".25"/>
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="softGlow-p"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <ellipse cx="120" cy="180" rx="68" ry="15" fill="#000" opacity=".18" filter="url(#softGlow-p)"/>
+              <!-- Folder back face -->
+              <path d="M 55 78 L 95 78 L 108 92 L 185 92 L 185 168 Q 185 172 181 172 L 59 172 Q 55 172 55 168 Z" fill="url(#folderBack-p)" stroke="#2a0d4d" stroke-width="1.2" opacity=".96" filter="url(#softGlow-p)"/>
+              <!-- Sheets peeking out -->
+              <rect x="78" y="98" width="84" height="62" rx="4" fill="url(#paperGrad-p)" stroke="#c8b8e8" stroke-width=".8" opacity=".95"/>
+              <line x1="86" y1="112" x2="148" y2="112" stroke="#7c3aed" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>
+              <line x1="86" y1="122" x2="138" y2="122" stroke="#9f5bff" stroke-width="1" stroke-linecap="round" opacity=".4"/>
+              <line x1="86" y1="132" x2="152" y2="132" stroke="#9f5bff" stroke-width="1" stroke-linecap="round" opacity=".4"/>
+              <line x1="86" y1="142" x2="124" y2="142" stroke="#9f5bff" stroke-width="1" stroke-linecap="round" opacity=".35"/>
+              <!-- Accent tab paper (gold) -->
+              <rect x="88" y="92" width="60" height="10" rx="3" fill="url(#paperAccent-p)" stroke="#8b6f47" stroke-width=".7" opacity=".9"/>
+              <!-- Folder front face (slightly transparent overlap) -->
+              <path d="M 55 108 L 185 108 L 185 168 Q 185 172 181 172 L 59 172 Q 55 172 55 168 Z" fill="url(#folderGrad-p)" stroke="#4a1a8a" stroke-width="1.2" opacity=".88" filter="url(#softGlow-p)"/>
+              <!-- Folder shine -->
+              <ellipse cx="98" cy="124" rx="38" ry="12" fill="url(#shimmerGrad-p)" opacity=".55"/>
+              <!-- Right edge depth -->
+              <path d="M 185 108 L 192 100 L 192 162 Q 192 166 188 166 L 185 168 Z" fill="#4a1a8a" opacity=".6" stroke="#2a0d4d" stroke-width=".7"/>
+              <!-- Bottom rim -->
+              <path d="M 55 168 L 62 175 L 188 175 L 185 168 Z" fill="#2a0d4d" opacity=".55"/>
+              <!-- Top rim light -->
+              <ellipse cx="120" cy="110" rx="60" ry="3" fill="none" stroke="#d8c2ff" stroke-width=".8" opacity=".35"/>
+            </svg>
+          </div>
+          <div class="product-name">Plantillas</div>
+          <div class="product-desc">Recursos listos para usar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 — OBJETIVO ===== -->
+<section id="objetivo">
+  <div class="bg-num" aria-hidden="true">02</div>
+  <div class="cube-stage" style="right: 6%; top: 18%;" aria-hidden="true">
+    <div class="cube">
+      <div class="face f1"></div>
+      <div class="face f2"></div>
+      <div class="face f3"></div>
+      <div class="face f4"></div>
+      <div class="face f5"></div>
+      <div class="face f6"></div>
+    </div>
+  </div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">02 · Objetivo</div>
+      <h2 class="section-title">Objetivo de la app</h2>
+    </div>
+    <div class="quote-block reveal" data-delay="1">
+      <p class="quote-text">
+        Crear un marketplace de infoproductos que permita a compradores argentinos <em>descubrir, evaluar y adquirir</em> contenido digital con métodos de pago locales, en un entorno donde las <em>reseñas verificadas</em> y la <em>previsualización de contenido</em> son el principal motor de decisión de compra, eliminando las fricciones de registro forzado, costos inesperados y falta de transparencia que hoy generan abandono de carrito.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 — DESKTOP RESEARCH ===== -->
+<section id="research">
+  <div class="bg-num" aria-hidden="true">03</div>
+  <div class="orb-3d orb-left" aria-hidden="true"></div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">03 · Desktop Research</div>
+      <h2 class="section-title">Contexto del mercado</h2>
+      <p class="section-lead">El e-learning y los infoproductos viven uno de los momentos de mayor expansión global — y Argentina aún no tiene un jugador local que ordene la categoría.</p>
+    </div>
+    <div class="research-grid">
+      <div class="card stat-card tilt reveal" data-delay="1">
+        <div class="stat-icon">🌎</div>
+        <h3>Mercado global</h3>
+        <p>El e-learning superó los <strong style="color:var(--text)">USD 250.000M</strong> en 2023 y se proyecta llegar a <strong style="color:var(--text)">USD 600.000M en 2030</strong>. LATAM es una de las regiones de mayor crecimiento.</p>
+      </div>
+      <div class="card stat-card tilt reveal" data-delay="2">
+        <div class="stat-icon">🇦🇷</div>
+        <h3>Argentina</h3>
+        <p>Ninguna plataforma domina el mercado local con pagos en pesos + catálogo centralizado + comunidad. Mercado Libre tiene la sección de infoproductos subdesarrollada.</p>
+      </div>
+      <div class="card stat-card tilt reveal" data-delay="3">
+        <div class="stat-icon">👤</div>
+        <h3>El usuario</h3>
+        <p>Perfil <strong style="color:var(--text)">18-35 años</strong>. Descubre productos en Instagram/TikTok. Confianza promedio de <strong style="color:var(--text)">3.6/5</strong>. Principal barrera: falta de previsualización y ausencia de reseñas reales.</p>
+      </div>
+    </div>
+    <div class="insight-line reveal" data-delay="3">
+      La oportunidad está en el espacio vacío entre <strong>Hotmart</strong> (sin catálogo unificado) y <strong>Mercado Libre</strong> (sin foco en contenido digital).
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 — BENCHMARKING ===== -->
+<section id="benchmark">
+  <div class="bg-num" aria-hidden="true">04</div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">04 · Benchmarking</div>
+      <h2 class="section-title">Análisis competitivo</h2>
+      <p class="section-lead">Tres referentes del e-commerce y los infoproductos — fortalezas que copiar, debilidades que aprovechar.</p>
+    </div>
+    <div class="benchmark-grid">
+      <!-- Mercado Libre -->
+      <div class="card benchmark-card tilt reveal" data-delay="1">
+        <div class="bench-name">Mercado Libre</div>
+        <ul class="bench-list">
+          <li class="pro"><span class="ic">✓</span>Búsqueda potente con filtros avanzados</li>
+          <li class="pro"><span class="ic">✓</span>Sistema de calificaciones de vendedores sólido</li>
+          <li class="pro"><span class="ic">✓</span>Mercado Pago integrado — fluido y seguro</li>
+          <li class="pro"><span class="ic">✓</span>Seguimiento de pedidos en tiempo real</li>
+          <li class="divider"></li>
+          <li class="con"><span class="ic">✕</span>Home saturada de publicidad</li>
+          <li class="con"><span class="ic">✕</span>Sección de infoproductos casi inexistente</li>
+          <li class="con"><span class="ic">✕</span>Onboarding confuso para nuevos usuarios</li>
+        </ul>
+      </div>
+      <!-- Amazon -->
+      <div class="card benchmark-card tilt reveal" data-delay="2">
+        <div class="bench-name">Amazon</div>
+        <ul class="bench-list">
+          <li class="pro"><span class="ic">✓</span>Reseñas extraordinariamente detalladas (fotos + IA + FAQ)</li>
+          <li class="pro"><span class="ic">✓</span>Compra en 1-Click y carrito persistente multi-dispositivo</li>
+          <li class="pro"><span class="ic">✓</span>Seguimiento con mapa en tiempo real</li>
+          <li class="divider"></li>
+          <li class="con"><span class="ic">✕</span>Interfaz abrumadora para usuarios nuevos</li>
+          <li class="con"><span class="ic">✕</span>Poca presencia local en Argentina</li>
+          <li class="con"><span class="ic">✕</span>Anuncios patrocinados tapan resultados orgánicos</li>
+        </ul>
+      </div>
+      <!-- Tienda Nube -->
+      <div class="card benchmark-card tilt reveal" data-delay="3">
+        <div class="bench-name">Tienda Nube</div>
+        <ul class="bench-list">
+          <li class="pro"><span class="ic">✓</span>Experiencia limpia y profesional en tiendas configuradas</li>
+          <li class="pro"><span class="ic">✓</span>Venta de infoproductos con entrega digital automática</li>
+          <li class="pro"><span class="ic">✓</span>Integración con Mercado Pago y tarjetas</li>
+          <li class="divider"></li>
+          <li class="con"><span class="ic">✕</span>No hay app unificada para compradores</li>
+          <li class="con"><span class="ic">✕</span>Sin sistema de reviews propio</li>
+          <li class="con"><span class="ic">✕</span>Descubrimiento de productos nulo (sin catálogo propio)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="reveal" data-delay="2">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Criterio</th>
+              <th>Mercado Libre</th>
+              <th>Amazon</th>
+              <th>Tienda Nube</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Infoproductos</td><td>Limitado</td><td>Kindle / Audible</td><td>Configurable</td></tr>
+            <tr><td>Reviews</td><td>Vendedor + producto</td><td>Muy detalladas</td><td>Básico / inexistente</td></tr>
+            <tr><td>Pagos locales</td><td>Mercado Pago</td><td>Tarjeta</td><td>Múltiples</td></tr>
+            <tr><td>Descubrimiento</td><td>Búsqueda potente</td><td>Búsqueda + IA</td><td>Sin catálogo propio</td></tr>
+            <tr><td>Comunidad</td><td>No</td><td>No</td><td>No</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 05 — RESEARCH USUARIOS ===== -->
+<section id="users-research">
+  <div class="bg-num" aria-hidden="true">05</div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">05 · Investigación de usuarios</div>
+      <h2 class="section-title">Research — Entrevista + Encuesta</h2>
+      <p class="section-lead">Una entrevista en profundidad combinada con una encuesta a 10 usuarios reveló patrones consistentes sobre confianza, descubrimiento y abandono.</p>
+    </div>
+
+    <div class="reveal" data-delay="1">
+      <div class="subsection-label">
+        <span class="num">A</span>
+        <h3>Entrevista en profundidad</h3>
+      </div>
+      <div class="interview-card">
+        <div class="interview-header">
+          <div class="avatar">T</div>
+          <div class="interview-meta">
+            <div class="name">Tiago, 19 años</div>
+            <div class="role">Estudiante de Marketing Digital</div>
+          </div>
+        </div>
+        <div class="quotes-grid">
+          <div class="quote-card tilt">
+            <div class="emoji">💬</div>
+            <p>"Las reseñas reflejan la experiencia real. Son lo único que me da certeza."</p>
+          </div>
+          <div class="quote-card tilt">
+            <div class="emoji">💬</div>
+            <p>"Si me piden registrarme para una compra esporádica, abandono el sitio."</p>
+          </div>
+          <div class="quote-card tilt">
+            <div class="emoji">💬</div>
+            <p>"App ideal: rapidez, confianza y logística rápida. Nada más."</p>
+          </div>
+        </div>
+        <a href="https://www.loom.com/share/9844ffeabe8443a6a1b79f606bc55136" target="_blank" rel="noopener" class="external-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          Ver entrevista en Loom →
+        </a>
+      </div>
+    </div>
+
+    <div class="survey-block reveal" data-delay="2">
+      <div class="subsection-label">
+        <span class="num">B</span>
+        <h3>Encuesta · 10 respuestas</h3>
+      </div>
+      <div class="stats-grid">
+        <div class="mini-stat tilt"><div class="value">18-24 años</div><div class="label">Perfil mayoritario de encuestados</div></div>
+        <div class="mini-stat tilt"><div class="value">Cursos & mentorías</div><div class="label">Productos más demandados</div></div>
+        <div class="mini-stat tilt"><div class="value">Instagram / TikTok</div><div class="label">Canal #1 de descubrimiento</div></div>
+        <div class="mini-stat tilt"><div class="value">3.6 / 5</div><div class="label">Confianza promedio al comprar</div></div>
+        <div class="mini-stat tilt"><div class="value">50%</div><div class="label">Abandonó una compra antes de pagar, por costos inesperados o registro forzado</div></div>
+        <div class="mini-stat tilt"><div class="value">Mercado Pago</div><div class="label">Método de pago preferido</div></div>
+        <div class="mini-stat tilt"><div class="value">Garantía de devolución</div><div class="label">Factor determinante para decidir comprar</div></div>
+      </div>
+
+      <div class="distrust-card">
+        <h4>⚠ Principales fuentes de desconfianza</h4>
+        <ul class="distrust-list">
+          <li>No poder ver el contenido antes de pagar</li>
+          <li>Falta de reseñas o testimonios reales</li>
+          <li>Autor desconocido o precio sospechosamente bajo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 06 — USER PERSONA ===== -->
+<section id="persona">
+  <div class="bg-num" aria-hidden="true">06</div>
+  <div class="ring-3d" style="right: -160px; top: 20%;" aria-hidden="true"></div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">06 · User Persona</div>
+      <h2 class="section-title">User Persona</h2>
+      <p class="section-lead">La síntesis de la investigación se materializa en un perfil concreto que guía cada decisión de diseño.</p>
+    </div>
+
+    <div class="persona-card reveal" data-delay="1">
+      <div class="persona-header">
+        <div class="persona-avatar">L</div>
+        <div class="persona-info">
+          <div class="name">Lucas M.</div>
+          <div class="meta">
+            <span>24 años</span>
+            <span>Freelancer / Estudiante</span>
+            <span>Notebook & celular</span>
+          </div>
+        </div>
+      </div>
+      <div class="persona-quote">
+        Quiero aprender algo nuevo pero no voy a pagar sin ver qué estoy comprando.
+      </div>
+      <div class="persona-grid">
+        <div class="persona-block">
+          <h4>Motivaciones</h4>
+          <ul>
+            <li>Crecer profesionalmente</li>
+            <li>Aprender a su propio ritmo</li>
+            <li>Acceder a conocimiento sin pagar una carrera</li>
+          </ul>
+        </div>
+        <div class="persona-block">
+          <h4>Frustraciones</h4>
+          <ul>
+            <li>Miedo a que sea una estafa</li>
+            <li>No poder previsualizar el contenido</li>
+            <li>Procesos de pago complicados</li>
+          </ul>
+        </div>
+        <div class="persona-block">
+          <h4>Apps que usa</h4>
+          <ul>
+            <li>Instagram</li>
+            <li>Mercado Libre</li>
+            <li>WhatsApp</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 32px;" class="reveal" data-delay="2">
+      <a href="https://crepe-arctic-76082138.figma.site" target="_blank" rel="noopener" class="external-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Ver Proto Persona en Figma →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 07 — USER FLOW ===== -->
+<section id="user-flow">
+  <div class="bg-num" aria-hidden="true">07</div>
+  <div class="cube-stage" style="left: 6%; bottom: 14%; opacity: 0.25;" aria-hidden="true">
+    <div class="cube">
+      <div class="face f1"></div><div class="face f2"></div><div class="face f3"></div>
+      <div class="face f4"></div><div class="face f5"></div><div class="face f6"></div>
+    </div>
+  </div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">07 · User Flow</div>
+      <h2 class="section-title">User Flow</h2>
+    </div>
+    <div class="link-section reveal" data-delay="1">
+      <p>El flujo principal cubre el recorrido del comprador — desde el descubrimiento del producto en el feed hasta la confirmación de compra y el acceso al contenido digital. Está diseñado para minimizar pasos y maximizar señales de confianza en cada etapa.</p>
+      <a href="https://holly-five-60860808.figma.site" target="_blank" rel="noopener" class="big-link">
+        <span class="icon">🔀</span>
+        Ver User Flow en Figma
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 08 — MAPA DE SITIO ===== -->
+<section id="sitemap">
+  <div class="bg-num" aria-hidden="true">08</div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">08 · Mapa de Sitio</div>
+      <h2 class="section-title">Mapa de Sitio</h2>
+    </div>
+    <div class="link-section reveal" data-delay="1">
+      <p>Estructura navegacional completa de la plataforma, organizada en secciones principales: <strong style="color:var(--text)">Home, Catálogo, Página de Producto, Carrito, Checkout y Perfil de Usuario</strong>.</p>
+      <a href="#" class="big-link placeholder">
+        <span class="icon">🗺️</span>
+        Ver Mapa de Sitio en Figma → [PEGAR LINK DE FIGMA]
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 09 — ARQUITECTURA DE LA INFORMACIÓN ===== -->
+<section id="ai">
+  <div class="bg-num" aria-hidden="true">09</div>
+  <div class="orb-3d orb-right orb-small" style="top: 50%;" aria-hidden="true"></div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">09 · Arquitectura de la Información</div>
+      <h2 class="section-title">Arquitectura de la Información</h2>
+    </div>
+    <div class="link-section reveal" data-delay="1">
+      <p>Jerarquía y organización de contenidos diseñada para <strong style="color:var(--text)">reducir la fricción en el proceso de decisión de compra</strong>, priorizando las reseñas, la previsualización y los métodos de pago locales como elementos de primer nivel.</p>
+      <a href="#" class="big-link placeholder">
+        <span class="icon">🏛️</span>
+        Ver AI en Figma → [PEGAR LINK DE FIGMA]
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 10 — WIREFRAMES ===== -->
+<section id="wireframes">
+  <div class="bg-num" aria-hidden="true">10</div>
+  <div class="container section-content">
+    <div class="reveal">
+      <div class="eyebrow">10 · Wireframes</div>
+      <h2 class="section-title">Wireframes en baja fidelidad</h2>
+      <p class="section-lead">Diseñados en paralelo para escritorio y mobile, priorizando consistencia en el flujo de compra y adaptación a cada contexto de uso.</p>
+    </div>
+    <div class="wireframe-grid">
+      <div class="wireframe-card tilt reveal" data-delay="1">
+        <div class="wf-icon">💻</div>
+        <h3>Versión Web</h3>
+        <p>Wireframes de las pantallas principales en desktop: Home, Catálogo, Ficha de producto y Checkout.</p>
+        <a href="#" class="big-link placeholder">Ver en Figma → [PEGAR LINK WEB]</a>
+      </div>
+      <div class="wireframe-card tilt reveal" data-delay="2">
+        <div class="wf-icon">📱</div>
+        <h3>Versión Mobile</h3>
+        <p>Wireframes adaptados para la versión app mobile con flujo de compra optimizado para pantallas pequeñas.</p>
+        <a href="#" class="big-link placeholder">Ver en Figma → [PEGAR LINK MOBILE]</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-title">Ramiro Della Torre</div>
+    <div class="footer-divider"></div>
+    <div class="footer-meta">Diseño UX/UI · Comisión A · ISEC 2026</div>
+  </div>
+</footer>
+
+<script>
+  // ===== Navbar scroll state =====
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 30) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+  }, { passive: true });
+
+  // ===== Scroll reveal with IntersectionObserver =====
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  reveals.forEach(el => io.observe(el));
+
+  // ===== Subtle parallax on bg numbers =====
+  const bgNums = document.querySelectorAll('.bg-num');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      bgNums.forEach(n => {
+        const rect = n.parentElement.getBoundingClientRect();
+        const offset = (rect.top + window.scrollY - y) * 0.05;
+        n.style.transform = `translateY(calc(-50% + ${offset}px))`;
+      });
+      ticking = false;
+    });
+    ticking = true;
+  }, { passive: true });
+
+  // ===== Spline loader hide on ready =====
+  const splineEl = document.getElementById('splineHero');
+  const splineLoader = document.getElementById('splineLoader');
+  if (splineEl) {
+    const hideLoader = () => splineLoader && splineLoader.classList.add('hidden');
+    splineEl.addEventListener('load', hideLoader);
+    // Fallback: hide after 6s en caso de no dispararse el evento
+    setTimeout(hideLoader, 6000);
+  }
+
+  // ===== 3D Tilt on cards =====
+  const tiltEls = document.querySelectorAll('.tilt');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reducedMotion) {
+    tiltEls.forEach(el => {
+      let rect = null;
+      el.addEventListener('mouseenter', () => { rect = el.getBoundingClientRect(); });
+      el.addEventListener('mousemove', (e) => {
+        if (!rect) rect = el.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const rx = (y - 0.5) * -8;
+        const ry = (x - 0.5) * 10;
+        el.style.transform = `perspective(1100px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+        el.style.setProperty('--mx', `${x * 100}%`);
+        el.style.setProperty('--my', `${y * 100}%`);
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+        rect = null;
+      });
+    });
+  }
+</script>
+</body>
+</html>
